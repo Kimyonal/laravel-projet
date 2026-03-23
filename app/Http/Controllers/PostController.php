@@ -8,48 +8,68 @@ use App\Models\Post;
 class PostController extends Controller
 {
 
+// afficher posts
 public function index()
 {
 
-$posts = Post::with('user','likes')->latest()->get();
+    $posts = Post::with('user')->latest()->get();
 
-return view('posts.index',compact('posts'));
+    return view('index',compact('posts'));
 
 }
 
+
+// create post
 public function store(Request $request)
 {
 
-Post::create([
-'content'=>$request->content,
-'user_id'=>session('user_id')
-]);
+    $post = new Post();
 
-return back();
+    $post->content = $request->content;
+    $post->user_id = session('user_id');
 
-}
+    $post->save();
 
-public function update(Request $request,Post $post)
-{
-
-$this->authorize('update',$post);
-
-$post->update([
-'content'=>$request->content
-]);
-
-return back();
+    return redirect('/posts');
 
 }
 
-public function destroy(Post $post)
+
+// edit page
+public function edit($id)
 {
 
-$this->authorize('delete',$post);
+    $post = Post::findOrFail($id);
 
-$post->delete();
+    return view('edit',compact('post'));
 
-return back();
+}
+
+
+// update
+public function update(Request $request,$id)
+{
+
+    $post = Post::findOrFail($id);
+
+    $post->content = $request->content;
+
+    $post->save();
+
+    return redirect('/posts');
+
+}
+
+
+// delete
+public function destroy($id)
+{
+
+    $post = Post::findOrFail($id);
+
+    $post->delete();
+
+    return redirect('/posts');
 
 }
 

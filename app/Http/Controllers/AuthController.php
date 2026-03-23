@@ -1,37 +1,67 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\User;
+
 use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+
+// afficher register
+public function showRegister()
 {
-    $user = User::create([
-        'name'=>$request->name,
-        'email'=>$request->email,
-        'password'=>bcrypt($request->password)
-    ]);
-
-    session(['user_id'=>$user->id]);
-
-    return redirect('/posts');
+    return view('register');
 }
+
+// enregistrer user
+public function register(Request $request)
+{
+
+    $user = new User();
+
+    $user->name = $request->name;
+    $user->email = $request->email;
+    $user->password = Hash::make($request->password);
+
+    $user->save();
+
+    return redirect('/login');
+
+}
+
+// afficher login
+public function showLogin()
+{
+    return view('login');
+}
+
+// login
 public function login(Request $request)
 {
+
     $user = User::where('email',$request->email)->first();
 
-    if($user && password_verify($request->password,$user->password)){
-        session(['user_id'=>$user->id]);
+    if($user && Hash::check($request->password,$user->password))
+    {
+
+        session([
+            'user_id'=>$user->id,
+            'user_name'=>$user->name
+        ]);
+
         return redirect('/posts');
+
     }
 
-    return back()->with('error','Login incorrect');
-    
+    return back()->with('error','Email ou password incorrect');
+
 }
+
+// logout
 public function logout()
 {
-    session()->forget('user_id');
+    session()->flush();
     return redirect('/login');
 }}

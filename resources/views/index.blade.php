@@ -51,6 +51,8 @@
     <!-- Modifier -->
     @if(session('user_id') == $post->user_id)
 
+    <h2>Edit Post</h2>
+    
     <form method="POST" action="/posts/{{ $post->id }}">
         @csrf
         @method('PUT')
